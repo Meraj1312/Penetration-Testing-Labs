@@ -16,7 +16,7 @@ A remote code execution vulnerability was successfully exploited in a Bolt CMS i
 ### Port Scanning  
 Initial reconnaissance was performed using Nmap to identify open ports and services.  
 
-![Nmap Scan](Screenshot%202026-01-09%20171724.png)  
+![Nmap Scan](Images/Screenshot%202026-01-09%20171724.png)  
 
 **Command:**  
 ```bash
@@ -33,11 +33,11 @@ The service on port 8000 was identified as Bolt CMS through the HTTP response he
 ### Web Enumeration  
 The web application on port 8000 was confirmed to be **Bolt CMS version 3.7.1**. The main page contained a welcome message from the user "bolt" (Jake), indicating he was new to the CMS.  
 
-![Welcome Message](Screenshot%202026-01-09%20171701.png)  
+![Welcome Message](Images/Screenshot%202026-01-09%20171701.png)  
 
 Further inspection of the site revealed an internal IT message exposed publicly, which contained administrative credentials.  
 
-![Internal Message with Credentials](Screenshot%202026-01-09%20173716.png)  
+![Internal Message with Credentials](Images/Screenshot%202026-01-09%20173716.png)  
 
 **Credentials Discovered:**  
 - **Username:** bolt  
@@ -53,7 +53,7 @@ http://10.81.144.228:8000/bolt/login
 
 Using Metasploit, a search for Bolt-related exploits was conducted.  
 
-![Metasploit Search](Screenshot%202026-01-09%20182923.png)  
+![Metasploit Search](Images/Screenshot%202026-01-09%20182923.png)  
 
 An authenticated remote code execution exploit was identified:  
 - **Module:** `exploit/unix/webapp/bolt_authenticated_rce`  
@@ -65,7 +65,7 @@ An authenticated remote code execution exploit was identified:
 ### Metasploit Configuration  
 The exploit was configured with the gathered credentials and target information.  
 
-![Metasploit Configuration](Screenshot%202026-01-09%20182953.png)  
+![Metasploit Configuration](Images/Screenshot%202026-01-09%20182953.png)  
 
 **Parameters Set:**  
 - `RHOST`: 10.81.144.228  
@@ -80,7 +80,7 @@ The exploit was executed, resulting in a reverse shell with **root privileges**.
 
 Once access was gained, the system was enumerated and the flag was located and retrieved.  
 
-![Post-Exploitation and Flag Retrieval](Screenshot%202026-01-09%20183015.png)  
+![Post-Exploitation and Flag Retrieval](Images/Screenshot%202026-01-09%20183015.png)  
 
 **Commands Executed:**  
 ```bash
@@ -105,4 +105,5 @@ cat flag.txt
 - **Restrict access** to internal messages and administrative interfaces.  
 - **Implement strong password policies** and avoid storing credentials in plaintext.  
 - **Use network segmentation** to limit exposure of management interfaces.  
+
 - **Conduct regular security audits** and penetration tests to identify misconfigurations.
